@@ -1,6 +1,7 @@
 # Offline BIP39 Bitcoin Wallet Report
 
 **PROGRAMA SOLO CON FINES EDUCATIVOS Y DE PRUEBA**
+**NO SE RECOMIENDA USAR CON FONDOS REALES**
 
 ## Descripción del script
 
