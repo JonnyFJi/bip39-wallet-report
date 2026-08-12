@@ -475,7 +475,7 @@ python3 -c "from wallet_bip39_off_line import decrypt_file_content; print(decryp
 
 ### ✅ Resumen final
 
-El script está **completo, seguro y listo para producción**. Cumple con:
+El script está **completo, seguro y listo para uso educativo**. Cumple con:
 
 - ✅ Estándares BIP39, BIP32, BIP44, BIP49, BIP84, BIP86
 - ✅ Seguridad criptográfica adecuada
