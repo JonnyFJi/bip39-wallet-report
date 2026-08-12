@@ -1,7 +1,10 @@
 # Offline BIP39 Bitcoin Wallet Report
 
 **PROGRAMA SOLO CON FINES EDUCATIVOS Y DE PRUEBA.**
-**NO SE RECOMIENDA USAR CON FONDOS REALES**
+**NO SE RECOMIENDA USAR CON FONDOS REALES.**
+**No es sustituto para una Hot Wallet o una Hardware wallet.**
+**Es una alternativa a otras herramientas similares para generar y verificar wallets de Bitcoin.**
+
 
 ## Descripción del script
 
