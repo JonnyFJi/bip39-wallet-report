@@ -491,6 +491,7 @@ El script está **completo, seguro y listo para uso educativo**. Cumple con:
 
 **IMPORTANTE:**
 - Este script es solo para fines educativos y de prueba
+- No certifica que el sistema tiene suficiente entropía acumulada
 - No certifica que una entropía manual sea imprevisible
 - No certifica que el entorno no esté comprometido
 - No certifica que no haya errores de usuario
@@ -498,6 +499,7 @@ El script está **completo, seguro y listo para uso educativo**. Cumple con:
 - **Use el script con prudencia**
 - **NUNCA uses mnemonics reales en máquinas conectadas a internet**
 - **SIEMPRE verifica las addresses generadas en una wallet hardware antes de usar**
+- **No auditado para producción**: Este es un proyecto educativo. No ha sido auditado por firmas de seguridad independientes. Si consideras usarlo con fondos reales (*no recomendado*), entiende los riesgos documentados y se repite la **advertencia**, verifica siempre las addresses en una hardware wallet antes de depositar.
 
 ## Licencia
 
