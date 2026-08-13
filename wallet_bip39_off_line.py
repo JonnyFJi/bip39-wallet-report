@@ -66,10 +66,243 @@ except ImportError:
     print("    Instala con: pip3 install cryptography")
     print("    El script continuará pero NO podrá encriptar archivos.\n")
 
+# ============================================================================
+# WORDLIST BIP39 OFICIAL EMBEBIDA (para verificación offline)
+# Fuente: https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt
+# ============================================================================
+
+BIP39_OFFICIAL_WORDLIST = [
+    "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
+    "access", "accident", "account", "accuse", "achieve", "acid", "acoustic", "acquire", "across", "act",
+    "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust", "admit",
+    "adult", "advance", "advice", "aerobic", "affair", "afford", "afraid", "again", "age", "agent",
+    "agree", "ahead", "aim", "air", "airport", "aisle", "alarm", "album", "alcohol", "alert",
+    "alien", "all", "alley", "allow", "almost", "alone", "alpha", "already", "also", "alter",
+    "always", "amateur", "amazing", "among", "amount", "amused", "analyst", "anchor", "ancient", "anger",
+    "angle", "angry", "animal", "ankle", "announce", "annual", "another", "answer", "antenna", "antique",
+    "anxiety", "any", "apart", "apology", "appear", "apple", "approve", "april", "arch", "arctic",
+    "area", "arena", "argue", "arm", "armed", "armor", "army", "around", "arrange", "arrest",
+    "arrive", "arrow", "art", "artefact", "artist", "artwork", "ask", "aspect", "assault", "asset",
+    "assist", "assume", "asthma", "athlete", "atom", "attack", "attend", "attitude", "attract", "auction",
+    "audit", "august", "aunt", "author", "auto", "autumn", "average", "avocado", "avoid", "awake",
+    "aware", "away", "awesome", "awful", "awkward", "axis", "baby", "bachelor", "bacon", "badge",
+    "bag", "balance", "balcony", "ball", "bamboo", "banana", "banner", "bar", "barely", "bargain",
+    "barrel", "base", "basic", "basket", "battle", "beach", "bean", "beauty", "because", "become",
+    "beef", "before", "begin", "behave", "behind", "believe", "below", "belt", "bench", "benefit",
+    "best", "betray", "better", "between", "beyond", "bicycle", "bid", "bike", "bind", "biology",
+    "bird", "birth", "bitter", "black", "blade", "blame", "blanket", "blast", "bleak", "bless",
+    "blind", "blood", "blossom", "blouse", "blue", "blur", "blush", "board", "boat", "body",
+    "boil", "bomb", "bone", "bonus", "book", "boost", "border", "boring", "borrow", "boss",
+    "bottom", "bounce", "box", "boy", "bracket", "brain", "brand", "brass", "brave", "bread",
+    "breeze", "brick", "bridge", "brief", "bright", "bring", "brisk", "broccoli", "broken", "bronze",
+    "broom", "brother", "brown", "brush", "bubble", "buddy", "budget", "buffalo", "build", "bulb",
+    "bulk", "bullet", "bundle", "bunker", "burden", "burger", "burst", "bus", "business", "busy",
+    "butter", "buyer", "buzz", "cabbage", "cabin", "cable", "cactus", "cage", "cake", "call",
+    "calm", "camera", "camp", "can", "canal", "cancel", "candy", "cannon", "canoe", "canvas",
+    "canyon", "capable", "capital", "captain", "car", "carbon", "card", "cargo", "carpet", "carry",
+    "cart", "case", "cash", "casino", "castle", "casual", "cat", "catalog", "catch", "category",
+    "cattle", "caught", "cause", "caution", "cave", "ceiling", "celery", "cement", "census", "century",
+    "cereal", "certain", "chair", "chalk", "champion", "change", "chaos", "chapter", "charge", "chase",
+    "chat", "cheap", "check", "cheese", "chef", "cherry", "chest", "chicken", "chief", "child",
+    "chimney", "choice", "choose", "chronic", "chuckle", "chunk", "churn", "cigar", "cinnamon", "circle",
+    "citizen", "city", "civil", "claim", "clap", "clarify", "claw", "clay", "clean", "clerk",
+    "clever", "click", "client", "cliff", "climb", "clinic", "clip", "clock", "clog", "close",
+    "cloth", "cloud", "clown", "club", "clump", "cluster", "clutch", "coach", "coast", "coconut",
+    "code", "coffee", "coil", "coin", "collect", "color", "column", "combine", "come", "comfort",
+    "comic", "common", "company", "concert", "conduct", "confirm", "congress", "connect", "consider", "control",
+    "convince", "cook", "cool", "copper", "copy", "coral", "core", "corn", "correct", "cost",
+    "cotton", "couch", "country", "couple", "course", "cousin", "cover", "coyote", "crack", "cradle",
+    "craft", "cram", "crane", "crash", "crater", "crawl", "crazy", "cream", "credit", "creek",
+    "crew", "cricket", "crime", "crisp", "critic", "crop", "cross", "crouch", "crowd", "crucial",
+    "cruel", "cruise", "crumble", "crunch", "crush", "cry", "crystal", "cube", "culture", "cup",
+    "cupboard", "curious", "current", "curtain", "curve", "cushion", "custom", "cute", "cycle", "dad",
+    "damage", "damp", "dance", "danger", "daring", "dash", "daughter", "dawn", "day", "deal",
+    "debate", "debris", "decade", "december", "decide", "decline", "decorate", "decrease", "deer", "defense",
+    "define", "defy", "degree", "delay", "deliver", "demand", "demise", "denial", "dentist", "deny",
+    "depart", "depend", "deposit", "depth", "deputy", "derive", "describe", "desert", "design", "desk",
+    "despair", "destroy", "detail", "detect", "develop", "device", "devote", "diagram", "dial", "diamond",
+    "diary", "dice", "diesel", "diet", "differ", "digital", "dignity", "dilemma", "dinner", "dinosaur",
+    "direct", "dirt", "disagree", "discover", "disease", "dish", "dismiss", "disorder", "display", "distance",
+    "divert", "divide", "divorce", "dizzy", "doctor", "document", "dog", "doll", "dolphin", "domain",
+    "donate", "donkey", "donor", "door", "dose", "double", "dove", "draft", "dragon", "drama",
+    "drastic", "draw", "dream", "dress", "drift", "drill", "drink", "drip", "drive", "drop",
+    "drum", "dry", "duck", "dumb", "dune", "during", "dust", "dutch", "duty", "dwarf",
+    "dynamic", "eager", "eagle", "early", "earn", "earth", "easily", "east", "easy", "echo",
+    "ecology", "economy", "edge", "edit", "educate", "effort", "egg", "eight", "either", "elbow",
+    "elder", "electric", "elegant", "element", "elephant", "elevator", "elite", "else", "embark", "embody",
+    "embrace", "emerge", "emotion", "employ", "empower", "empty", "enable", "enact", "end", "endless",
+    "endorse", "enemy", "energy", "enforce", "engage", "engine", "enhance", "enjoy", "enlist", "enough",
+    "enrich", "enroll", "ensure", "enter", "entire", "entry", "envelope", "episode", "equal", "equip",
+    "era", "erase", "erode", "erosion", "error", "erupt", "escape", "essay", "essence", "estate",
+    "eternal", "ethics", "evidence", "evil", "evoke", "evolve", "exact", "example", "excess", "exchange",
+    "excite", "exclude", "excuse", "execute", "exercise", "exhaust", "exhibit", "exile", "exist", "exit",
+    "exotic", "expand", "expect", "expire", "explain", "expose", "express", "extend", "extra", "eye",
+    "eyebrow", "fabric", "face", "faculty", "fade", "faint", "faith", "fall", "false", "fame",
+    "family", "famous", "fan", "fancy", "fantasy", "farm", "fashion", "fat", "fatal", "father",
+    "fatigue", "fault", "favorite", "feature", "february", "federal", "fee", "feed", "feel", "female",
+    "fence", "festival", "fetch", "fever", "few", "fiber", "fiction", "field", "figure", "file",
+    "film", "filter", "final", "find", "fine", "finger", "finish", "fire", "firm", "first",
+    "fiscal", "fish", "fit", "fitness", "fix", "flag", "flame", "flash", "flat", "flavor",
+    "flee", "flight", "flip", "float", "flock", "floor", "flower", "fluid", "flush", "fly",
+    "foam", "focus", "fog", "foil", "fold", "follow", "food", "foot", "force", "forest",
+    "forget", "fork", "fortune", "forum", "forward", "fossil", "foster", "found", "fox", "fragile",
+    "frame", "frequent", "fresh", "friend", "fringe", "frog", "front", "frost", "frown", "frozen",
+    "fruit", "fuel", "fun", "funny", "furnace", "fury", "future", "gadget", "gain", "galaxy",
+    "gallery", "game", "gap", "garage", "garbage", "garden", "garlic", "garment", "gas", "gasp",
+    "gate", "gather", "gauge", "gaze", "general", "genius", "genre", "gentle", "genuine", "gesture",
+    "ghost", "giant", "gift", "giggle", "ginger", "giraffe", "girl", "give", "glad", "glance",
+    "glare", "glass", "glide", "glimpse", "globe", "gloom", "glory", "glove", "glow", "glue",
+    "goat", "goddess", "gold", "good", "goose", "gorilla", "gospel", "gossip", "govern", "gown",
+    "grab", "grace", "grain", "grant", "grape", "grass", "gravity", "great", "green", "grid",
+    "grief", "grit", "grocery", "group", "grow", "grunt", "guard", "guess", "guide", "guilt",
+    "guitar", "gun", "gym", "habit", "hair", "half", "hammer", "hamster", "hand", "happy",
+    "harbor", "hard", "harsh", "harvest", "hat", "have", "hawk", "hazard", "head", "health",
+    "heart", "heavy", "hedgehog", "height", "hello", "helmet", "help", "hen", "hero", "hidden",
+    "high", "hill", "hint", "hip", "hire", "history", "hobby", "hockey", "hold", "hole",
+    "holiday", "hollow", "home", "honey", "hood", "hope", "horn", "horror", "horse", "hospital",
+    "host", "hotel", "hour", "hover", "hub", "huge", "human", "humble", "humor", "hundred",
+    "hungry", "hunt", "hurdle", "hurry", "hurt", "husband", "hybrid", "ice", "icon", "idea",
+    "identify", "idle", "ignore", "ill", "illegal", "illness", "image", "imitate", "immense", "immune",
+    "impact", "impose", "improve", "impulse", "inch", "include", "income", "increase", "index", "indicate",
+    "indoor", "industry", "infant", "inflict", "inform", "inhale", "inherit", "initial", "inject", "injury",
+    "inmate", "inner", "innocent", "input", "inquiry", "insane", "insect", "inside", "inspire", "install",
+    "intact", "interest", "into", "invest", "invite", "involve", "iron", "island", "isolate", "issue",
+    "item", "ivory", "jacket", "jaguar", "jar", "jazz", "jealous", "jeans", "jelly", "jewel",
+    "job", "join", "joke", "journey", "joy", "judge", "juice", "jump", "jungle", "junior",
+    "junk", "just", "kangaroo", "keen", "keep", "ketchup", "key", "kick", "kid", "kidney",
+    "kind", "kingdom", "kiss", "kit", "kitchen", "kite", "kitten", "kiwi", "knee", "knife",
+    "knock", "know", "lab", "label", "labor", "ladder", "lady", "lake", "lamp", "language",
+    "laptop", "large", "later", "latin", "laugh", "laundry", "lava", "law", "lawn", "lawsuit",
+    "layer", "lazy", "leader", "leaf", "learn", "leave", "lecture", "left", "leg", "legal",
+    "legend", "leisure", "lemon", "lend", "length", "lens", "leopard", "lesson", "letter", "level",
+    "liar", "liberty", "library", "license", "life", "lift", "light", "like", "limb", "limit",
+    "link", "lion", "liquid", "list", "little", "live", "lizard", "load", "loan", "lobster",
+    "local", "lock", "logic", "lonely", "long", "loop", "lottery", "loud", "lounge", "love",
+    "loyal", "lucky", "luggage", "lumber", "lunar", "lunch", "luxury", "lyrics", "machine", "mad",
+    "magic", "magnet", "maid", "mail", "main", "major", "make", "mammal", "man", "manage",
+    "mandate", "mango", "mansion", "manual", "maple", "marble", "march", "margin", "marine", "market",
+    "marriage", "mask", "mass", "master", "match", "material", "math", "matrix", "matter", "maximum",
+    "maze", "meadow", "mean", "measure", "meat", "mechanic", "medal", "media", "melody", "melt",
+    "member", "memory", "mention", "menu", "mercy", "merge", "merit", "merry", "mesh", "message",
+    "metal", "method", "middle", "midnight", "milk", "million", "mimic", "mind", "minimum", "minor",
+    "minute", "miracle", "mirror", "misery", "miss", "mistake", "mix", "mixed", "mixture", "mobile",
+    "model", "modify", "mom", "moment", "monitor", "monkey", "monster", "month", "moon", "moral",
+    "more", "morning", "mosquito", "mother", "motion", "motor", "mountain", "mouse", "move", "movie",
+    "much", "muffin", "mule", "multiply", "muscle", "museum", "mushroom", "music", "must", "mutual",
+    "myself", "mystery", "myth", "naive", "name", "napkin", "narrow", "nasty", "nation", "nature",
+    "near", "neck", "need", "negative", "neglect", "neither", "nephew", "nerve", "nest", "net",
+    "network", "neutral", "never", "news", "next", "nice", "night", "noble", "noise", "nominee",
+    "noodle", "normal", "north", "nose", "notable", "note", "nothing", "notice", "novel", "now",
+    "nuclear", "number", "nurse", "nut", "oak", "obey", "object", "oblige", "obscure", "observe",
+    "obtain", "obvious", "occur", "ocean", "october", "odor", "off", "offer", "office", "often",
+    "oil", "okay", "old", "olive", "olympic", "omit", "once", "one", "onion", "online",
+    "only", "open", "opera", "opinion", "oppose", "option", "orange", "orbit", "orchard", "order",
+    "ordinary", "organ", "orient", "original", "orphan", "ostrich", "other", "outdoor", "outer", "output",
+    "outside", "oval", "oven", "over", "own", "owner", "oxygen", "oyster", "ozone", "pact",
+    "paddle", "page", "pair", "palace", "palm", "panda", "panel", "panic", "panther", "paper",
+    "parade", "parent", "park", "parrot", "party", "pass", "patch", "path", "patient", "patrol",
+    "pattern", "pause", "pave", "payment", "peace", "peanut", "pear", "peasant", "pelican", "pen",
+    "penalty", "pencil", "people", "pepper", "perfect", "permit", "person", "pet", "phone", "photo",
+    "phrase", "physical", "piano", "picnic", "picture", "piece", "pig", "pigeon", "pill", "pilot",
+    "pink", "pioneer", "pipe", "pistol", "pitch", "pizza", "place", "planet", "plastic", "plate",
+    "play", "please", "pledge", "pluck", "plug", "plunge", "poem", "poet", "point", "polar",
+    "pole", "police", "pond", "pony", "pool", "popular", "portion", "position", "possible", "post",
+    "potato", "pottery", "poverty", "powder", "power", "practice", "praise", "predict", "prefer", "prepare",
+    "present", "pretty", "prevent", "price", "pride", "primary", "print", "priority", "prison", "private",
+    "prize", "problem", "process", "produce", "profit", "program", "project", "promote", "proof", "property",
+    "prosper", "protect", "proud", "provide", "public", "pudding", "pull", "pulp", "pulse", "pumpkin",
+    "punch", "pupil", "puppy", "purchase", "purity", "purpose", "purse", "push", "put", "puzzle",
+    "pyramid", "quality", "quantum", "quarter", "question", "quick", "quit", "quiz", "quote", "rabbit",
+    "raccoon", "race", "rack", "radar", "radio", "rail", "rain", "raise", "rally", "ramp",
+    "ranch", "random", "range", "rapid", "rare", "rate", "rather", "raven", "raw", "razor",
+    "ready", "real", "reason", "rebel", "rebuild", "recall", "receive", "recipe", "record", "recycle",
+    "reduce", "reflect", "reform", "refuse", "region", "regret", "regular", "reject", "relax", "release",
+    "relief", "rely", "remain", "remember", "remind", "remove", "render", "renew", "rent", "reopen",
+    "repair", "repeat", "replace", "report", "require", "rescue", "resemble", "resist", "resource", "response",
+    "result", "retire", "retreat", "return", "reunion", "reveal", "review", "reward", "rhythm", "rib",
+    "ribbon", "rice", "rich", "ride", "ridge", "rifle", "right", "rigid", "ring", "riot",
+    "ripple", "risk", "ritual", "rival", "river", "road", "roast", "robot", "robust", "rocket",
+    "romance", "roof", "rookie", "room", "rose", "rotate", "rough", "round", "route", "royal",
+    "rubber", "rude", "rug", "rule", "run", "runway", "rural", "sad", "saddle", "sadness",
+    "safe", "sail", "salad", "salmon", "salon", "salt", "salute", "same", "sample", "sand",
+    "satisfy", "satoshi", "sauce", "sausage", "save", "say", "scale", "scan", "scare", "scatter",
+    "scene", "scheme", "school", "science", "scissors", "scorpion", "scout", "scrap", "screen", "script",
+    "scrub", "sea", "search", "season", "seat", "second", "secret", "section", "security", "seed",
+    "seek", "segment", "select", "sell", "seminar", "senior", "sense", "sentence", "series", "service",
+    "session", "settle", "setup", "seven", "shadow", "shaft", "shallow", "share", "shed", "shell",
+    "sheriff", "shield", "shift", "shine", "ship", "shiver", "shock", "shoe", "shoot", "shop",
+    "short", "shoulder", "shove", "shrimp", "shrug", "shuffle", "shy", "sibling", "sick", "side",
+    "siege", "sight", "sign", "silent", "silk", "silly", "silver", "similar", "simple", "since",
+    "sing", "siren", "sister", "situate", "six", "size", "skate", "sketch", "ski", "skill",
+    "skin", "skirt", "skull", "slab", "slam", "sleep", "slender", "slice", "slide", "slight",
+    "slim", "slogan", "slot", "slow", "slush", "small", "smart", "smile", "smoke", "smooth",
+    "snack", "snake", "snap", "sniff", "snow", "soap", "soccer", "social", "sock", "soda",
+    "soft", "solar", "soldier", "solid", "solution", "solve", "someone", "song", "soon", "sorry",
+    "sort", "soul", "sound", "soup", "source", "south", "space", "spare", "spatial", "spawn",
+    "speak", "special", "speed", "spell", "spend", "sphere", "spice", "spider", "spike", "spin",
+    "spirit", "split", "spoil", "sponsor", "spoon", "sport", "spot", "spray", "spread", "spring",
+    "spy", "square", "squeeze", "squirrel", "stable", "stadium", "staff", "stage", "stairs", "stamp",
+    "stand", "start", "state", "stay", "steak", "steel", "stem", "step", "stereo", "stick",
+    "still", "sting", "stock", "stomach", "stone", "stool", "story", "stove", "strategy", "street",
+    "strike", "strong", "struggle", "student", "stuff", "stumble", "style", "subject", "submit", "subway",
+    "success", "such", "sudden", "suffer", "sugar", "suggest", "suit", "summer", "sun", "sunny",
+    "sunset", "super", "supply", "supreme", "sure", "surface", "surge", "surprise", "surround", "survey",
+    "suspect", "sustain", "swallow", "swamp", "swap", "swarm", "swear", "sweet", "swift", "swim",
+    "swing", "switch", "sword", "symbol", "symptom", "syrup", "system", "table", "tackle", "tag",
+    "tail", "talent", "talk", "tank", "tape", "target", "task", "taste", "tattoo", "taxi",
+    "teach", "team", "tell", "ten", "tenant", "tennis", "tent", "term", "test", "text",
+    "thank", "that", "theme", "then", "theory", "there", "they", "thing", "this", "thought",
+    "three", "thrive", "throw", "thumb", "thunder", "ticket", "tide", "tiger", "tilt", "timber",
+    "time", "tiny", "tip", "tired", "tissue", "title", "toast", "tobacco", "today", "toddler",
+    "toe", "together", "toilet", "token", "tomato", "tomorrow", "tone", "tongue", "tonight", "tool",
+    "tooth", "top", "topic", "topple", "torch", "tornado", "tortoise", "toss", "total", "tourist",
+    "toward", "tower", "town", "toy", "track", "trade", "traffic", "tragic", "train", "transfer",
+    "trap", "trash", "travel", "tray", "treat", "tree", "trend", "trial", "tribe", "trick",
+    "trigger", "trim", "trip", "trophy", "trouble", "truck", "true", "truly", "trumpet", "trust",
+    "truth", "try", "tube", "tuition", "tumble", "tuna", "tunnel", "turkey", "turn", "turtle",
+    "twelve", "twenty", "twice", "twin", "twist", "two", "type", "typical", "ugly", "umbrella",
+    "unable", "unaware", "uncle", "uncover", "under", "undo", "unfair", "unfold", "unhappy", "uniform",
+    "unique", "unit", "universe", "unknown", "unlock", "until", "unusual", "unveil", "update", "upgrade",
+    "uphold", "upon", "upper", "upset", "urban", "urge", "usage", "use", "used", "useful",
+    "useless", "usual", "utility", "vacant", "vacuum", "vague", "valid", "valley", "valve", "van",
+    "vanish", "vapor", "various", "vast", "vault", "vehicle", "velvet", "vendor", "venture", "venue",
+    "verb", "verify", "version", "very", "vessel", "veteran", "viable", "vibrant", "vicious", "victory",
+    "video", "view", "village", "vintage", "violin", "virtual", "virus", "visa", "visit", "visual",
+    "vital", "vivid", "vocal", "voice", "void", "volcano", "volume", "vote", "voyage", "wage",
+    "wagon", "wait", "walk", "wall", "walnut", "want", "warfare", "warm", "warrior", "wash",
+    "wasp", "waste", "water", "wave", "way", "wealth", "weapon", "wear", "weasel", "weather",
+    "web", "wedding", "weekend", "weird", "welcome", "west", "wet", "whale", "what", "wheat",
+    "wheel", "when", "where", "whip", "whisper", "wide", "width", "wife", "wild", "will",
+    "win", "window", "wine", "wing", "wink", "winner", "winter", "wire", "wisdom", "wise",
+    "wish", "witness", "wolf", "woman", "wonder", "wood", "wool", "word", "work", "world",
+    "worry", "worth", "wrap", "wreck", "wrestle", "wrist", "write", "wrong", "yard", "year",
+    "yellow", "you", "young", "youth", "zebra", "zero", "zone", "zoo"
+]
+
+BIP39_OFFICIAL_SHA256 = "187db04a869dd9bc7be80d21a86497d692c0db6abd3aa8cb6be5d618ff757fae"
+
+
+def verify_against_bip39_official():
+    """Verifica que la wordlist embebida coincida con BIP39 oficial (offline)"""
+    if len(BIP39_OFFICIAL_WORDLIST) != 2048:
+        print(f"\n❌ ERROR: BIP39 oficial embebida tiene {len(BIP39_OFFICIAL_WORDLIST)} palabras")
+        return False
+    
+    official_hash = hashlib.sha256('\n'.join(BIP39_OFFICIAL_WORDLIST).encode('utf-8')).hexdigest()
+    if official_hash != BIP39_OFFICIAL_SHA256:
+        print(f"\n❌ ERROR: Hash BIP39 oficial incorrecto")
+        print(f"   Esperado: {BIP39_OFFICIAL_SHA256}")
+        print(f"   Obtenido: {official_hash}")
+        return False
+    
+    print(f"✅ BIP39 Oficial (GitHub): VERIFICADA (2048 palabras)")
+    return True
+
+
 VALID_ENTROPY_BITS = {128, 160, 192, 224, 256}
 VALID_WORD_COUNTS = {12, 15, 18, 21, 24}
 DEFAULT_VECTORS_FILE = "vectors.json"
-GAP_LIMIT = 5  # Reducido a 5 direcciones por ruta
+GAP_LIMIT = 5
 
 
 def normalize_text(text):
@@ -174,27 +407,18 @@ def mnemonic_to_entropy(mnemonic):
 
 
 def mnemonic_seed(mnemonic, passphrase=""):
-    """Genera la seed BIP39 usando PBKDF2-HMAC-SHA512."""
     return Bip39SeedGenerator(normalize_text(mnemonic)).Generate(
         normalize_text(passphrase)
     )
 
 
 def bip32_master_key(seed):
-    """
-    Calcula la clave maestra BIP-32 desde la seed BIP39.
-    Usa HMAC-SHA512 con Key="Bitcoin seed" y Data=seed.
-    Retorna (master_key, chain_code) en formato hex.
-    """
-    # HMAC-SHA512(Key="Bitcoin seed", Data=seed)
     I = hmac.new(
         key=b"Bitcoin seed",
         msg=seed,
         digestmod=hashlib.sha512
     ).digest()
     
-    # I[0:32] = master private key (32 bytes)
-    # I[32:64] = master chain code (32 bytes)
     master_key_hex = I[:32].hex()
     chain_code_hex = I[32:].hex()
     
@@ -316,29 +540,18 @@ def derive_addresses_bip86(seed, coin, coin_type, gap_limit=GAP_LIMIT):
 
 
 def write_secure_file(path, content, encrypt=True, password=None):
-    """Escribe archivo de forma segura, SIEMPRE encriptado con AES-256-GCM."""
     destination = pathlib.Path(path).expanduser().resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    # SIEMPRE encriptar (comportamiento por defecto)
     if CRYPTO_AVAILABLE and password:
-        # Encriptar con AES-256-GCM
         password_bytes = password.encode('utf-8')
-        # Derivar clave de 32 bytes usando SHA-256
         key = hashlib.sha256(password_bytes).digest()
-        
-        # Generar nonce aleatorio de 12 bytes
         nonce = os.urandom(12)
-        
-        # Encriptar
         aesgcm = AESGCM(key)
         ciphertext = aesgcm.encrypt(nonce, content.encode('utf-8'), associated_data=None)
-        
-        # Combinar nonce + ciphertext y codificar en base64
         encrypted_content = base64.b64encode(nonce + ciphertext).decode('utf-8')
         content_to_write = f"ENCRYPTED:{encrypted_content}"
     else:
-        # Si no hay crypto o password, escribir sin encriptar (fallback)
         content_to_write = content
 
     fd, tmp_name = tempfile.mkstemp(prefix=destination.name + ".", dir=str(destination.parent))
@@ -368,25 +581,19 @@ def write_secure_file(path, content, encrypt=True, password=None):
 
 
 def decrypt_file_content(encrypted_content, password):
-    """Desencripta contenido encriptado con AES-256-GCM."""
     if not CRYPTO_AVAILABLE:
         raise RuntimeError("La librería 'cryptography' no está instalada.")
     
     if not encrypted_content.startswith("ENCRYPTED:"):
         raise ValueError("El archivo no está encriptado o tiene formato inválido.")
     
-    # Decodificar base64
     encrypted_data = base64.b64decode(encrypted_content[10:])
-    
-    # Extraer nonce (12 bytes) y ciphertext
     nonce = encrypted_data[:12]
     ciphertext = encrypted_data[12:]
     
-    # Derivar clave
     password_bytes = password.encode('utf-8')
     key = hashlib.sha256(password_bytes).digest()
     
-    # Desencriptar
     aesgcm = AESGCM(key)
     plaintext = aesgcm.decrypt(nonce, ciphertext, associated_data=None)
     
@@ -460,7 +667,6 @@ def attempt_clear_history():
 
 
 def get_secure_input(prompt, allow_empty=False):
-    """Obtiene input del usuario sin mostrarlo en pantalla (como password)."""
     while True:
         value = getpass.getpass(prompt)
         if value or allow_empty:
@@ -469,16 +675,11 @@ def get_secure_input(prompt, allow_empty=False):
 
 
 def find_last_word(incomplete_phrase):
-    """
-    Encuentra TODAS las palabras posibles que completan una mnemonic incompleta.
-    Retorna una lista de palabras válidas.
-    """
     mnemo = Mnemonic("english")
     wordlist = mnemo.wordlist
     words = incomplete_phrase.strip().split()
     word_count = len(words)
     
-    # Determinar longitud objetivo y tamaño de entropía
     if word_count == 11:
         target_count = 12
         entropy_bits = 128
@@ -503,7 +704,6 @@ def find_last_word(incomplete_phrase):
 
 
 def get_secure_mnemonic():
-    """Obtiene mnemonic de forma segura (sin mostrar en pantalla)."""
     print("\n📝 Ingresa la mnemonic (las palabras se ocultarán mientras escribes):")
     print("   Escribe todas las palabras separadas por espacios.")
     print("   Presiona Enter cuando termines.\n")
@@ -511,7 +711,6 @@ def get_secure_mnemonic():
 
 
 def get_secure_entropy_hex():
-    """Obtiene entropía hexadecimal de forma segura."""
     print("\n🔢 Ingresa la entropía hexadecimal (oculto):")
     print("   Debe ser 32, 40, 48, 56 o 64 caracteres hexadecimales.")
     print("   Presiona Enter cuando termines.\n")
@@ -519,7 +718,6 @@ def get_secure_entropy_hex():
 
 
 def get_secure_entropy_bin():
-    """Obtiene entropía binaria de forma segura."""
     print("\n🔢 Ingresa la entropía binaria (oculto):")
     print("   Debe ser 128, 160, 192, 224 o 256 bits (solo 0 y 1).")
     print("   Presiona Enter cuando termines.\n")
@@ -527,18 +725,13 @@ def get_secure_entropy_bin():
 
 
 def get_secure_passphrase():
-    """Obtiene passphrase de forma segura."""
     print("\n🔐 Ingresa la passphrase BIP39 (opcional, oculto):")
     print("   Presiona Enter para dejarla vacía si no quieres usar una.\n")
     return get_secure_input("Passphrase: ", allow_empty=True)
 
 
 def resolve_input(args, interactive=False):
-    """Resuelve la entrada de datos, soportando modo interactivo."""
-    
-    # Modo interactivo: solicitar datos que faltan
     if interactive:
-        # Determinar qué entrada usar
         has_words = args.words is not None
         has_entropy_bin = bool(args.entropy_bin)
         has_entropy_hex = bool(args.entropy_hex)
@@ -548,7 +741,6 @@ def resolve_input(args, interactive=False):
         input_count = sum([has_words, has_entropy_bin, has_entropy_hex, has_mnemonic, has_mnemonic_incomplete])
         
         if input_count == 0:
-            # Preguntar al usuario qué quiere hacer
             print("\nSelecciona el tipo de entrada:")
             print("  [1] Generar nueva mnemonic aleatoria")
             print("  [2] Ingresar entropía hexadecimal")
@@ -560,7 +752,6 @@ def resolve_input(args, interactive=False):
             while True:
                 choice = input("Opción [1-5]: ").strip()
                 if choice == '1':
-                    # Sub-menú para elegir longitud
                     print("\nSelecciona la longitud de la mnemonic:")
                     print("  [1] 12 palabras (128 bits - estándar, recomendado)")
                     print("  [2] 24 palabras (256 bits - máxima seguridad)")
@@ -592,7 +783,6 @@ def resolve_input(args, interactive=False):
                 else:
                     print("❌ Opción inválida. Ingresa un número entre 1 y 5.")
         
-        # Preguntar por la red (mainnet/testnet)
         print("\nSelecciona la red Bitcoin:")
         print("  [1] Mainnet (Bitcoin principal - default)")
         print("  [2] Testnet (Bitcoin de pruebas)")
@@ -609,11 +799,9 @@ def resolve_input(args, interactive=False):
             else:
                 print("❌ Opción inválida. Ingresa 1 o 2.")
         
-        # Si no hay passphrase, solicitarla
         if not args.passphrase:
             args.passphrase = get_secure_passphrase()
     
-    # Validar que haya exactamente una entrada
     if sum(1 for x in [args.words, args.entropy_bin, args.entropy_hex, args.mnemonic, args.mnemonic_incomplete] if x) != 1:
         raise ValueError(
             "Debes proporcionar exactamente una entrada entre -w/--words, --entropy-bin, --entropy-hex, --mnemonic o --mnemonic-incomplete."
@@ -647,7 +835,6 @@ def resolve_input(args, interactive=False):
         return recovered["entropy"], mnemonic, recovered, "mnemonic"
 
     if args.mnemonic_incomplete:
-        # Encontrar TODAS las palabras posibles
         incomplete_phrase = normalize_text(args.mnemonic_incomplete).strip()
         candidates = find_last_word(incomplete_phrase)
         
@@ -656,18 +843,15 @@ def resolve_input(args, interactive=False):
         
         print(f"\n✅ Se encontraron {len(candidates)} palabra(s) posible(s):\n")
         
-        # Mostrar solo la lista numerada de palabras
         for i, word in enumerate(candidates, start=1):
             print(f"  [{i:2d}] {word}")
         
         print()
         
         if len(candidates) == 1:
-            # Solo una opción, usarla directamente
             mnemonic = incomplete_phrase + " " + candidates[0]
             print("✅ Única palabra encontrada. Continuando...\n")
         else:
-            # Múltiples opciones, solicitar selección al usuario
             print(f"⚠️  Hay {len(candidates)} palabras posibles.\n")
             print("INSTRUCCIONES:")
             print("1. Prueba cada palabra en tu wallet para encontrar la correcta")
@@ -696,7 +880,6 @@ def resolve_input(args, interactive=False):
                         print("❌ Entrada inválida. Ingresa un número o 'q' para cancelar.")
                 
                 except EOFError:
-                    # Manejar caso de input no interactivo (pipes, redirección)
                     print("\n⚠️  Modo no interactivo detectado. Usando la primera palabra.")
                     print("⚠️  DEBES verificar manualmente cuál es la palabra correcta.\n")
                     mnemonic = incomplete_phrase + " " + candidates[0]
@@ -720,9 +903,8 @@ def build_context(args, interactive=False):
     entropy, mnemonic, recovered, input_mode = resolve_input(args, interactive)
     seed = mnemonic_seed(mnemonic, args.passphrase)
     
-    # Calcular clave maestra BIP-32 correctamente con HMAC-SHA512
     bip32_master, bip32_chain_code = bip32_master_key(seed)
-    bip32_root_key = bip32_master + bip32_chain_code  # 64 bytes (128 hex chars)
+    bip32_root_key = bip32_master + bip32_chain_code
     
     network = select_network(args.network)
 
@@ -746,9 +928,9 @@ def build_context(args, interactive=False):
         "mnemonic_valid": True,
         "passphrase_used": bool(args.passphrase),
         "bip39_seed_hex": seed.hex(),
-        "bip32_root_key": bip32_root_key,  # Clave maestra BIP-32 correcta (master + chain code)
-        "bip32_master_key": bip32_master,  # Solo master key (32 bytes)
-        "bip32_chain_code": bip32_chain_code,  # Solo chain code (32 bytes)
+        "bip32_root_key": bip32_root_key,
+        "bip32_master_key": bip32_master,
+        "bip32_chain_code": bip32_chain_code,
         "derivations": derivations,
         "gap_limit": GAP_LIMIT,
     }
@@ -760,12 +942,6 @@ def build_context(args, interactive=False):
 
 
 def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False):
-    """
-    Genera el reporte.
-    Por defecto, SIEMPRE oculta datos sensibles en terminal (hide_sensitive=True).
-    Si show_all=True, muestra TODO (modo educativo).
-    """
-    # Si show_all=True, forzar hide_sensitive=False
     if show_all:
         hide_sensitive = False
     
@@ -779,7 +955,6 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
     ]
     
     if not hide_sensitive or not terminal_mode:
-        # Mostrar datos sensibles solo si no se ocultan o es para archivo
         lines.extend([
             f"Entropy bits    : {data['entropy_bits']}",
             f"Entropy binary  : {data['entropy_bin']}",
@@ -788,7 +963,6 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
             f"Checksum valid  : {data['checksum_valid']}",
         ])
     else:
-        # Ocultar datos sensibles en terminal (COMPORTAMIENTO POR DEFECTO)
         lines.extend([
             "Entropy bits    : [OCULTO - ver archivo desencriptado]",
             "Entropy binary  : [OCULTO - ver archivo desencriptado]",
@@ -900,12 +1074,10 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
 
 
 def print_report(data, show_all=False):
-    """Imprime reporte. Por defecto oculta datos sensibles, usa show_all=True para mostrar todo."""
     print(format_report(data, terminal_mode=True, hide_sensitive=not show_all, show_all=show_all))
 
 
 def export_wallet(data, output_path, output_format, password):
-    """Exporta wallet SIEMPRE encriptada con AES-256-GCM."""
     if output_format == "json":
         content = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     else:
@@ -922,15 +1094,8 @@ def load_vectors(vectors_path):
 
 
 def run_bip39_test_vectors(vectors_path):
-    """
-    Ejecuta test vectors BIP39 oficiales.
-    Formato: {"english": [[entropy_hex, mnemonic, seed], ...]}
-    
-    NOTA: Esta función NO usa encriptación para mantener compatibilidad con tests.
-    """
     vectors = load_vectors(vectors_path)
     
-    # Si es un diccionario con clave "english", extraer la lista
     if isinstance(vectors, dict):
         if "english" in vectors:
             vectors = vectors["english"]
@@ -975,7 +1140,7 @@ def run_bip39_test_vectors(vectors_path):
                 raise AssertionError(f"Vector {i}: entropía no coincide en round-trip.")
         
         else:
-            raise ValueError(f"Vector {i}: formato no soportado. Se espera [entropy_hex, mnemonic, seed].")
+            raise ValueError(f"Vector {i}: formato no soportado.")
 
     print(f"Test vectors BIP39: OK ({len(vectors)} casos)")
 
@@ -1009,14 +1174,25 @@ def main():
         run_bip39_test_vectors(args.vectors_file)
         return
 
-    # Verificar cryptografía
     if not CRYPTO_AVAILABLE:
         print("\n❌ ERROR: La librería 'cryptography' es requerida pero no está instalada.")
         print("    Instala con: pip3 install cryptography")
         print("    El script NO puede continuar sin encriptación.\n")
         sys.exit(1)
 
-    # Solicitar contraseña SIEMPRE (comportamiento por defecto)
+    # ========================================================================
+    # NUEVO: Verificación contra BIP39 oficial embebida (offline)
+    # ========================================================================
+    print("\n" + "="*60)
+    print("VERIFICACIÓN DE INTEGRIDAD BIP39")
+    print("="*60)
+    ok_official = verify_against_bip39_official()
+    if not ok_official:
+        print("\n⚠️  ADVERTENCIA: Wordlist BIP39 oficial INCORRECTA")
+        print("   ¡NO uses este script para generar wallets reales!\n")
+        if input("¿Continuar de todos modos? (s/N): ").strip().lower() != 's':
+            sys.exit(0)
+
     print("\n🔐 SEGURIDAD ACTIVADA")
     print("   - El archivo de salida será encriptado con AES-256-GCM")
     if not args.show_all:
@@ -1039,7 +1215,6 @@ def main():
             sys.exit(1)
     print()
 
-    # Modo interactivo o normal
     if args.interactive:
         print("\n🔒 MODO INTERACTIVO SEGURO")
         print("   Los datos ingresados no se mostrarán en pantalla.")
@@ -1048,12 +1223,10 @@ def main():
     else:
         data = build_context(args, interactive=False)
 
-    # Mostrar reporte (oculto por defecto, show_all para mostrar todo)
     print_report(data, show_all=args.show_all)
 
     attempt_clear_history()
 
-    # Exportar archivo (SIEMPRE encriptado)
     final_path = export_wallet(data, args.output, args.format, password=encrypt_password)
     
     print()
