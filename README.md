@@ -23,6 +23,122 @@ El script realiza las siguientes funciones principales:
 9. **Exportación segura**: Escribe archivos encriptados con AES-256-GCM y permisos restringidos (0o600)
 10. **Verificación de wordlist**: Valida la wordlist embebida contra la lista oficial BIP39 de GitHub
 
+## 🌟 Modo Interactivo (-i) - Método Recomendado
+
+**El modo interactivo es la forma más segura y fácil de usar el script.** Ideal para usuarios que:
+
+- ✅ No quieren memorizar comandos complejos
+- ✅ Prefieren menús guiados paso a paso
+- ✅ Quieren evitar errores de escritura
+- ✅ Necesitan ayuda visual durante el proceso
+- ✅ Desean máxima seguridad (sin historial de comandos)
+
+### Cómo usar el modo interactivo
+
+```bash
+python3 wallet_bip39_off_line.py -i
+```
+
+**Flujo completo:**
+
+1. **Pide contraseña para encriptar** (oculta, sin eco)
+2. **Muestra menú de tipo de entrada:**
+Selecciona el tipo de entrada:
+Generar nueva mnemonic aleatoria
+
+Ingresar entropía hexadecimal
+
+Ingresar entropía binaria
+
+Ingresar mnemonic existente
+
+Calcular última palabra (11 o 23 palabras)
+
+text
+3. **Si seleccionas [1], pregunta longitud:**
+Selecciona la longitud de la mnemonic:
+12 palabras (128 bits - estándar, recomendado)
+
+24 palabras (256 bits - máxima seguridad)
+
+text
+4. **Pregunta red Bitcoin:**
+Selecciona la red Bitcoin:
+Mainnet (Bitcoin principal - default)
+
+Testnet (Bitcoin de pruebas)
+
+text
+5. **Pide passphrase** (opcional, oculta)
+6. **Genera wallet** con análisis de seguridad automático
+7. **Muestra reporte** en terminal (datos sensibles ocultos)
+8. **Guarda archivo encriptado** en `output/bip39_wallet_export.json`
+
+### Ventajas del modo interactivo
+
+- 🎯 **Sin errores de sintaxis**: No necesitas recordar banderas ni comandos
+- 🔒 **Máxima seguridad**: Todo el input es oculto (getpass)
+- 📋 **Guía visual**: Menús claros en cada paso
+- ⚡ **Rápido**: Flujo optimizado en 5-6 pasos
+- 🛡️ **Sin historial**: Las contraseñas no quedan en el shell
+- ✅ **Validación automática**: El script valida cada entrada
+
+### Ejemplo de sesión interactiva
+
+```bash
+$ python3 wallet_bip39_off_line.py -i
+
+============================================================
+VERIFICACIÓN DE INTEGRIDAD BIP39
+============================================================
+✅ BIP39 Oficial (GitHub): VERIFICADA (2048 palabras)
+
+🔐 SEGURIDAD ACTIVADA
+- El archivo de salida será encriptado con AES-256-GCM
+- Los datos sensibles se ocultarán en pantalla
+- Debes recordar esta contraseña para abrir el archivo
+
+Contraseña para encriptar: **
+Confirmar contraseña: **
+
+🔒 MODO INTERACTIVO SEGURO
+Los datos ingresados no se mostrarán en pantalla.
+No quedarán en el historial del shell.
+
+Selecciona el tipo de entrada:
+Generar nueva mnemonic aleatoria[1]
+Ingresar entropía hexadecimal[2]
+Ingresar entropía binaria[3]
+Ingresar mnemonic existente[4]
+Calcular última palabra (11 o 23 palabras)[5]
+
+Opción [1-5]: 1
+
+Selecciona la longitud de la mnemonic:
+12 palabras (128 bits - estándar, recomendado)[1]
+24 palabras (256 bits - máxima seguridad)[2]
+
+Opción [1-2]: 1
+
+Selecciona la red Bitcoin:
+Mainnet (Bitcoin principal - default)[1]
+Testnet (Bitcoin de pruebas)[2]
+
+Opción [1-2]: 1
+
+🔐 Ingresa la passphrase BIP39 (opcional, oculto):
+Presiona Enter para dejarla vacía si no quieres usar una.
+
+Passphrase: 
+
+✅ Mnemonic sin repeticiones generada en 3 intento(s)
+
+[Reporte completo con análisis de seguridad...]
+
+✅ Archivo encriptado guardado: output/bip39_wallet_export_001.json
+⚠️  Recuerda la contraseña para desencriptar.
+⚠️  Si pierdes la contraseña, perderás acceso a los datos.
+```
 ## Características de seguridad
 
 - ✅ **Encriptación AES-256-GCM**: Todos los archivos de salida están encriptados
