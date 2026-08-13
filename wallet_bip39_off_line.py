@@ -42,6 +42,8 @@ import pathlib
 import sys
 import tempfile
 import unicodedata
+from collections import Counter
+import math
 
 from mnemonic import Mnemonic
 from bip_utils import (
@@ -67,8 +69,9 @@ except ImportError:
     print("    El script continuará pero NO podrá encriptar archivos.\n")
 
 # ============================================================================
-# WORDLIST BIP39 OFICIAL EMBEBIDA (para verificación offline)
+# WORDLIST BIP39 OFICIAL EMBEBIDA
 # Fuente: https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt
+# Hash SHA256: 187db04a869dd9bc7be80d21a86497d692c0db6abd3aa8cb6be5d618ff757fae
 # ============================================================================
 
 BIP39_OFFICIAL_WORDLIST = [
@@ -287,15 +290,15 @@ def verify_against_bip39_official():
     if len(BIP39_OFFICIAL_WORDLIST) != 2048:
         print(f"\n❌ ERROR: BIP39 oficial embebida tiene {len(BIP39_OFFICIAL_WORDLIST)} palabras")
         return False
-    
-    official_hash = hashlib.sha256('\n'.join(BIP39_OFFICIAL_WORDLIST).encode('utf-8')).hexdigest()
+
+    official_hash = hashlib.sha256("\n".join(BIP39_OFFICIAL_WORDLIST).encode("utf-8")).hexdigest()
     if official_hash != BIP39_OFFICIAL_SHA256:
         print(f"\n❌ ERROR: Hash BIP39 oficial incorrecto")
         print(f"   Esperado: {BIP39_OFFICIAL_SHA256}")
         print(f"   Obtenido: {official_hash}")
         return False
-    
-    print(f"✅ BIP39 Oficial (GitHub): VERIFICADA (2048 palabras)")
+
+    print("✅ BIP39 Oficial (GitHub): VERIFICADA (2048 palabras)")
     return True
 
 
@@ -315,9 +318,7 @@ def bytes_to_binary(data):
 
 def validate_entropy_length(bit_len):
     if bit_len not in VALID_ENTROPY_BITS:
-        raise ValueError(
-            "La entropía debe ser 128, 160, 192, 224 o 256 bits."
-        )
+        raise ValueError("La entropía debe ser 128, 160, 192, 224 o 256 bits.")
 
 
 def entropy_checksum_bits(entropy):
@@ -351,9 +352,7 @@ def hex_to_bytes(hex_str):
 
 def generate_entropy(words):
     if words not in VALID_WORD_COUNTS:
-        raise ValueError(
-            "BIP39 solo admite 12, 15, 18, 21 o 24 palabras."
-        )
+        raise ValueError("BIP39 solo admite 12, 15, 18, 21 o 24 palabras.")
     return os.urandom({12: 16, 15: 20, 18: 24, 21: 28, 24: 32}[words])
 
 
@@ -364,18 +363,11 @@ def entropy_to_mnemonic(entropy):
 def validate_mnemonic_text(mnemonic):
     phrase = normalize_text(mnemonic).strip()
     words = phrase.split()
-
     if len(words) not in VALID_WORD_COUNTS:
-        raise ValueError(
-            "La mnemonic debe tener 12, 15, 18, 21 o 24 palabras."
-        )
-
+        raise ValueError("La mnemonic debe tener 12, 15, 18, 21 o 24 palabras.")
     mnemo = Mnemonic("english")
     if not mnemo.check(phrase):
-        raise ValueError(
-            "La mnemonic no es válida o su checksum no coincide."
-        )
-
+        raise ValueError("La mnemonic no es válida o su checksum no coincide.")
     return phrase
 
 
@@ -383,19 +375,14 @@ def mnemonic_to_entropy(mnemonic):
     phrase = validate_mnemonic_text(mnemonic)
     mnemo = Mnemonic("english")
     words = phrase.split()
-
     indexes = [mnemo.wordlist.index(word) for word in words]
     bits = "".join(f"{idx:011b}" for idx in indexes)
-
     entropy_bits = {12: 128, 15: 160, 18: 192, 21: 224, 24: 256}[len(words)]
     checksum_bits = entropy_bits // 32
-
     entropy_bin = bits[:entropy_bits]
     embedded_checksum = bits[entropy_bits:entropy_bits + checksum_bits]
-
     entropy = int(entropy_bin, 2).to_bytes(entropy_bits // 8, "big")
     expected_checksum = entropy_checksum_bits(entropy)
-
     return {
         "entropy": entropy,
         "entropy_bin": entropy_bin,
@@ -407,22 +394,12 @@ def mnemonic_to_entropy(mnemonic):
 
 
 def mnemonic_seed(mnemonic, passphrase=""):
-    return Bip39SeedGenerator(normalize_text(mnemonic)).Generate(
-        normalize_text(passphrase)
-    )
+    return Bip39SeedGenerator(normalize_text(mnemonic)).Generate(normalize_text(passphrase))
 
 
 def bip32_master_key(seed):
-    I = hmac.new(
-        key=b"Bitcoin seed",
-        msg=seed,
-        digestmod=hashlib.sha512
-    ).digest()
-    
-    master_key_hex = I[:32].hex()
-    chain_code_hex = I[32:].hex()
-    
-    return master_key_hex, chain_code_hex
+    I = hmac.new(key=b"Bitcoin seed", msg=seed, digestmod=hashlib.sha512).digest()
+    return I[:32].hex(), I[32:].hex()
 
 
 def select_network(network):
@@ -449,7 +426,6 @@ def derive_addresses_bip44(seed, coin, coin_type, gap_limit=GAP_LIMIT):
     root = Bip44.FromSeed(seed, coin)
     account = root.Purpose().Coin().Account(0)
     change = account.Change(Bip44Changes.CHAIN_EXT)
-
     addresses = []
     for i in range(gap_limit):
         addr = change.AddressIndex(i)
@@ -460,12 +436,11 @@ def derive_addresses_bip44(seed, coin, coin_type, gap_limit=GAP_LIMIT):
             "private_key_wif": addr.PrivateKey().ToWif(),
             "public_key_hex": addr.PublicKey().RawCompressed().ToHex(),
         })
-
-    xpub = account.PublicKey().ToExtended()
     return {
         "path_template": f"m/44'/{coin_type}/0'/0/i",
-        "xpub": xpub,
+        "xpub": account.PublicKey().ToExtended(),
         "addresses": addresses,
+        "address_type": "P2PKH",
     }
 
 
@@ -473,7 +448,6 @@ def derive_addresses_bip49(seed, coin, coin_type, gap_limit=GAP_LIMIT):
     root = Bip49.FromSeed(seed, coin)
     account = root.Purpose().Coin().Account(0)
     change = account.Change(Bip44Changes.CHAIN_EXT)
-
     addresses = []
     for i in range(gap_limit):
         addr = change.AddressIndex(i)
@@ -484,12 +458,11 @@ def derive_addresses_bip49(seed, coin, coin_type, gap_limit=GAP_LIMIT):
             "private_key_wif": addr.PrivateKey().ToWif(),
             "public_key_hex": addr.PublicKey().RawCompressed().ToHex(),
         })
-
-    ypub = account.PublicKey().ToExtended()
     return {
         "path_template": f"m/49'/{coin_type}/0'/0/i",
-        "ypub": ypub,
+        "ypub": account.PublicKey().ToExtended(),
         "addresses": addresses,
+        "address_type": "P2WPKH-P2SH",
     }
 
 
@@ -497,7 +470,6 @@ def derive_addresses_bip84(seed, coin, coin_type, gap_limit=GAP_LIMIT):
     root = Bip84.FromSeed(seed, coin)
     account = root.Purpose().Coin().Account(0)
     change = account.Change(Bip44Changes.CHAIN_EXT)
-
     addresses = []
     for i in range(gap_limit):
         addr = change.AddressIndex(i)
@@ -508,12 +480,11 @@ def derive_addresses_bip84(seed, coin, coin_type, gap_limit=GAP_LIMIT):
             "private_key_wif": addr.PrivateKey().ToWif(),
             "public_key_hex": addr.PublicKey().RawCompressed().ToHex(),
         })
-
-    zpub = account.PublicKey().ToExtended()
     return {
         "path_template": f"m/84'/{coin_type}/0'/0/i",
-        "zpub": zpub,
+        "zpub": account.PublicKey().ToExtended(),
         "addresses": addresses,
+        "address_type": "P2WPKH",
     }
 
 
@@ -521,7 +492,6 @@ def derive_addresses_bip86(seed, coin, coin_type, gap_limit=GAP_LIMIT):
     root = Bip86.FromSeed(seed, coin)
     account = root.Purpose().Coin().Account(0)
     change = account.Change(Bip44Changes.CHAIN_EXT)
-
     addresses = []
     for i in range(gap_limit):
         addr = change.AddressIndex(i)
@@ -532,10 +502,10 @@ def derive_addresses_bip86(seed, coin, coin_type, gap_limit=GAP_LIMIT):
             "private_key_wif": addr.PrivateKey().ToWif(),
             "public_key_hex": addr.PublicKey().RawCompressed().ToHex(),
         })
-
     return {
         "path_template": f"m/86'/{coin_type}/0'/0/i",
         "addresses": addresses,
+        "address_type": "P2TR",
     }
 
 
@@ -544,13 +514,11 @@ def write_secure_file(path, content, encrypt=True, password=None):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
     if CRYPTO_AVAILABLE and password:
-        password_bytes = password.encode('utf-8')
-        key = hashlib.sha256(password_bytes).digest()
+        key = hashlib.sha256(password.encode("utf-8")).digest()
         nonce = os.urandom(12)
         aesgcm = AESGCM(key)
-        ciphertext = aesgcm.encrypt(nonce, content.encode('utf-8'), associated_data=None)
-        encrypted_content = base64.b64encode(nonce + ciphertext).decode('utf-8')
-        content_to_write = f"ENCRYPTED:{encrypted_content}"
+        ciphertext = aesgcm.encrypt(nonce, content.encode("utf-8"), associated_data=None)
+        content_to_write = "ENCRYPTED:" + base64.b64encode(nonce + ciphertext).decode("utf-8")
     else:
         content_to_write = content
 
@@ -560,14 +528,11 @@ def write_secure_file(path, content, encrypt=True, password=None):
             f.write(content_to_write)
             f.flush()
             os.fsync(f.fileno())
-
         try:
             os.chmod(tmp_name, 0o600)
         except OSError:
             pass
-
         os.replace(tmp_name, destination)
-
         try:
             os.chmod(destination, 0o600)
         except OSError:
@@ -583,38 +548,25 @@ def write_secure_file(path, content, encrypt=True, password=None):
 def decrypt_file_content(encrypted_content, password):
     if not CRYPTO_AVAILABLE:
         raise RuntimeError("La librería 'cryptography' no está instalada.")
-    
     if not encrypted_content.startswith("ENCRYPTED:"):
         raise ValueError("El archivo no está encriptado o tiene formato inválido.")
-    
     encrypted_data = base64.b64decode(encrypted_content[10:])
-    nonce = encrypted_data[:12]
-    ciphertext = encrypted_data[12:]
-    
-    password_bytes = password.encode('utf-8')
-    key = hashlib.sha256(password_bytes).digest()
-    
+    nonce, ciphertext = encrypted_data[:12], encrypted_data[12:]
+    key = hashlib.sha256(password.encode("utf-8")).digest()
     aesgcm = AESGCM(key)
     plaintext = aesgcm.decrypt(nonce, ciphertext, associated_data=None)
-    
-    return plaintext.decode('utf-8')
+    return plaintext.decode("utf-8")
 
 
 def generate_sequential_path(base_path):
     destination = pathlib.Path(base_path).expanduser().resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
-
     if not destination.exists():
         return destination
-
-    stem = destination.stem
-    suffix = destination.suffix
-    parent = destination.parent
-
+    stem, suffix, parent = destination.stem, destination.suffix, destination.parent
     counter = 1
     while True:
-        new_name = f"{stem}_{counter:03d}{suffix}"
-        new_path = parent / new_name
+        new_path = parent / f"{stem}_{counter:03d}{suffix}"
         if not new_path.exists():
             return new_path
         counter += 1
@@ -623,38 +575,18 @@ def generate_sequential_path(base_path):
 def audit_passphrase(passphrase):
     normalized = normalize_text(passphrase)
     utf8_bytes = normalized.encode("utf-8")
-
-    characters = len(normalized)
-    byte_length = len(utf8_bytes)
-    unique_characters = len(set(normalized))
-
-    has_lowercase = any(c.islower() for c in normalized)
-    has_uppercase = any(c.isupper() for c in normalized)
-    has_digits = any(c.isdigit() for c in normalized)
-    has_symbols = any(not c.isalnum() and not c.isspace() for c in normalized)
-    has_spaces = any(c.isspace() for c in normalized)
-
-    if characters == 0:
-        classification = "vacía"
-        security_note = "No añade incertidumbre adicional."
-    else:
-        classification = "proporcionada por el usuario"
-        security_note = (
-            "No es posible calcular su entropía real sin conocer el proceso aleatorio utilizado para elegirla."
-        )
-
     return {
-        "present": characters > 0,
-        "characters": characters,
-        "utf8_bytes": byte_length,
-        "unique_characters": unique_characters,
-        "has_lowercase": has_lowercase,
-        "has_uppercase": has_uppercase,
-        "has_digits": has_digits,
-        "has_symbols": has_symbols,
-        "has_spaces": has_spaces,
-        "classification": classification,
-        "security_note": security_note,
+        "present": len(normalized) > 0,
+        "characters": len(normalized),
+        "utf8_bytes": len(utf8_bytes),
+        "unique_characters": len(set(normalized)),
+        "has_lowercase": any(c.islower() for c in normalized),
+        "has_uppercase": any(c.isupper() for c in normalized),
+        "has_digits": any(c.isdigit() for c in normalized),
+        "has_symbols": any(not c.isalnum() and not c.isspace() for c in normalized),
+        "has_spaces": any(c.isspace() for c in normalized),
+        "classification": "vacía" if len(normalized) == 0 else "proporcionada por el usuario",
+        "security_note": "No añade incertidumbre adicional." if len(normalized) == 0 else "No es posible calcular su entropía real sin conocer el proceso aleatorio utilizado para elegirla.",
     }
 
 
@@ -678,28 +610,19 @@ def find_last_word(incomplete_phrase):
     mnemo = Mnemonic("english")
     wordlist = mnemo.wordlist
     words = incomplete_phrase.strip().split()
-    word_count = len(words)
-    
-    if word_count == 11:
-        target_count = 12
+    if len(words) == 11:
         entropy_bits = 128
-    elif word_count == 23:
-        target_count = 24
+    elif len(words) == 23:
         entropy_bits = 256
     else:
         raise ValueError("Solo se pueden calcular mnemonics de 11→12 o 23→24 palabras.")
-    
     checksum_bits = entropy_bits // 32
     valid_candidates = []
-    
-    print(f"Buscando palabras para completar mnemonic de {word_count} palabras...")
+    print(f"Buscando palabras para completar mnemonic de {len(words)} palabras...")
     print(f"Checksum de {checksum_bits} bits = {2**checksum_bits} posibilidades teóricas")
-    
     for candidate_word in wordlist:
-        test_phrase = incomplete_phrase + " " + candidate_word
-        if mnemo.check(test_phrase):
+        if mnemo.check(incomplete_phrase + " " + candidate_word):
             valid_candidates.append(candidate_word)
-    
     return valid_candidates
 
 
@@ -730,6 +653,110 @@ def get_secure_passphrase():
     return get_secure_input("Passphrase: ", allow_empty=True)
 
 
+def analizar_seguridad_mnemonic(mnemonic):
+    mnemo = Mnemonic("english")
+    words = mnemonic.strip().split()
+    word_count = len(words)
+    if word_count not in [12, 15, 18, 21, 24]:
+        return {"valido": False, "error": "Número de palabras inválido", "score": 0}
+    if not mnemo.check(mnemonic):
+        return {"valido": False, "error": "Checksum BIP39 inválido", "score": 0}
+
+    indices = [mnemo.wordlist.index(w) for w in words]
+    unique_words = len(set(words))
+    freq = Counter(words)
+
+    ratio_unicidad = unique_words / word_count
+    score_unicidad = 100 if ratio_unicidad >= 0.9 else (ratio_unicidad * 100)
+
+    entropia_shannon = -sum((c/word_count) * math.log2(c/word_count) for c in freq.values())
+    max_entropia = math.log2(word_count)
+    ratio_entropia = entropia_shannon / max_entropia
+    score_entropia = ratio_entropia * 100
+
+    secuencias = sum(1 for i in range(1, len(indices)) if indices[i] == indices[i-1] + 1)
+    score_secuencias = 100 if secuencias == 0 else max(0, 100 - (secuencias * 20))
+
+    media = sum(indices) / len(indices)
+    varianza = sum((i - media) ** 2 for i in indices) / len(indices)
+    varianza_esperada = (2048 ** 2) / 12
+    score_distribucion = min(varianza / varianza_esperada, 1.0) * 100
+
+    repetidas_consecutivas = sum(1 for i in range(1, len(words)) if words[i] == words[i-1])
+    palabras_repetidas_total = word_count - unique_words
+    palabras_con_repetidos = sum(1 for _, count in freq.items() if count > 1)
+    score_repetidas = 100 if palabras_repetidas_total == 0 else max(0, 100 - (palabras_repetidas_total * 25))
+
+    porcentaje_repeticion = (palabras_repetidas_total / word_count) * 100
+
+    if porcentaje_repeticion > 5:
+        alerta_manipulacion = "ALTA"
+        mensaje_manipulacion = "Posible manipulación manual detectada (repetición inusual)"
+        score_manipulacion = 40
+    elif porcentaje_repeticion > 2:
+        alerta_manipulacion = "MODERADA"
+        mensaje_manipulacion = "Verifica origen de las palabras (repetición moderada)"
+        score_manipulacion = 70
+    else:
+        alerta_manipulacion = "BAJA"
+        mensaje_manipulacion = "Distribución normal esperada"
+        score_manipulacion = 100
+
+    score_final = (
+        score_unicidad * 0.20 +
+        score_entropia * 0.20 +
+        score_secuencias * 0.20 +
+        score_distribucion * 0.15 +
+        score_repetidas * 0.15 +
+        score_manipulacion * 0.10
+    )
+
+    if score_final >= 80 and alerta_manipulacion == "BAJA":
+        clasificacion = "✅ FUERTE - Entropía adecuada"
+        recomendacion = "Esta mnemonic parece tener buena aleatoriedad."
+    elif score_final >= 60 and alerta_manipulacion in ["BAJA", "MODERADA"]:
+        clasificacion = "⚠️  MODERADA - Posibles patrones menores"
+        recomendacion = "Verifica que fue generada con RNG criptográfico."
+    elif score_final >= 40 or alerta_manipulacion == "MODERADA":
+        clasificacion = "⚠️  DÉBIL - Patrones detectados"
+        recomendacion = "Considera generar una nueva mnemonic con mejor entropía."
+    else:
+        clasificacion = "❌ MUY DÉBIL - Alta probabilidad de baja entropía"
+        recomendacion = "NO uses esta mnemonic. Genera una nueva con RNG criptográfico."
+
+    if alerta_manipulacion == "ALTA":
+        clasificacion = "⚠️  DÉBIL - Posible manipulación manual"
+        recomendacion = "Verifica origen de las palabras. Considera generar una nueva mnemonic."
+
+    return {
+        "valido": True,
+        "palabras": word_count,
+        "entropia_bits": {12: 128, 15: 160, 18: 192, 21: 224, 24: 256}[word_count],
+        "palabras_unicas": unique_words,
+        "ratio_unicidad": f"{ratio_unicidad:.2%}",
+        "entropia_shannon": f"{entropia_shannon:.2f} bits",
+        "ratio_entropia": f"{ratio_entropia:.2%}",
+        "secuencias_detectadas": secuencias,
+        "repetidas_consecutivas": repetidas_consecutivas,
+        "palabras_repetidas_total": palabras_repetidas_total,
+        "palabras_con_repetidos": palabras_con_repetidos,
+        "porcentaje_repeticion": f"{porcentaje_repeticion:.2%}",
+        "alerta_manipulacion": alerta_manipulacion,
+        "mensaje_manipulacion": mensaje_manipulacion,
+        "score": round(score_final, 1),
+        "clasificacion": clasificacion,
+        "recomendacion": recomendacion,
+        "detalles": {
+            "score_unicidad": round(score_unicidad, 1),
+            "score_entropia": round(score_entropia, 1),
+            "score_secuencias": round(score_secuencias, 1),
+            "score_distribucion": round(score_distribucion, 1),
+            "score_repetidas": round(score_repetidas, 1),
+            "score_manipulacion": round(score_manipulacion, 1),
+        }
+    }
+
+
 def resolve_input(args, interactive=False):
     if interactive:
         has_words = args.words is not None
@@ -737,9 +764,9 @@ def resolve_input(args, interactive=False):
         has_entropy_hex = bool(args.entropy_hex)
         has_mnemonic = bool(args.mnemonic)
         has_mnemonic_incomplete = bool(args.mnemonic_incomplete)
-        
+
         input_count = sum([has_words, has_entropy_bin, has_entropy_hex, has_mnemonic, has_mnemonic_incomplete])
-        
+
         if input_count == 0:
             print("\nSelecciona el tipo de entrada:")
             print("  [1] Generar nueva mnemonic aleatoria")
@@ -748,7 +775,7 @@ def resolve_input(args, interactive=False):
             print("  [4] Ingresar mnemonic existente")
             print("  [5] Calcular última palabra (11 o 23 palabras)")
             print()
-            
+
             while True:
                 choice = input("Opción [1-5]: ").strip()
                 if choice == '1':
@@ -756,7 +783,6 @@ def resolve_input(args, interactive=False):
                     print("  [1] 12 palabras (128 bits - estándar, recomendado)")
                     print("  [2] 24 palabras (256 bits - máxima seguridad)")
                     print()
-                    
                     while True:
                         length_choice = input("Opción [1-2]: ").strip()
                         if length_choice == '1':
@@ -782,12 +808,12 @@ def resolve_input(args, interactive=False):
                     break
                 else:
                     print("❌ Opción inválida. Ingresa un número entre 1 y 5.")
-        
+
         print("\nSelecciona la red Bitcoin:")
         print("  [1] Mainnet (Bitcoin principal - default)")
         print("  [2] Testnet (Bitcoin de pruebas)")
         print()
-        
+
         while True:
             network_choice = input("Opción [1-2]: ").strip()
             if network_choice == '1':
@@ -798,14 +824,12 @@ def resolve_input(args, interactive=False):
                 break
             else:
                 print("❌ Opción inválida. Ingresa 1 o 2.")
-        
+
         if not args.passphrase:
             args.passphrase = get_secure_passphrase()
-    
+
     if sum(1 for x in [args.words, args.entropy_bin, args.entropy_hex, args.mnemonic, args.mnemonic_incomplete] if x) != 1:
-        raise ValueError(
-            "Debes proporcionar exactamente una entrada entre -w/--words, --entropy-bin, --entropy-hex, --mnemonic o --mnemonic-incomplete."
-        )
+        raise ValueError("Debes proporcionar exactamente una entrada entre -w/--words, --entropy-bin, --entropy-hex, --mnemonic o --mnemonic-incomplete.")
 
     if args.entropy_bin:
         entropy = binary_to_bytes(args.entropy_bin)
@@ -837,17 +861,15 @@ def resolve_input(args, interactive=False):
     if args.mnemonic_incomplete:
         incomplete_phrase = normalize_text(args.mnemonic_incomplete).strip()
         candidates = find_last_word(incomplete_phrase)
-        
+
         if not candidates:
             raise ValueError("No se encontró ninguna palabra válida. Verifica que las palabras sean correctas.")
-        
+
         print(f"\n✅ Se encontraron {len(candidates)} palabra(s) posible(s):\n")
-        
         for i, word in enumerate(candidates, start=1):
             print(f"  [{i:2d}] {word}")
-        
         print()
-        
+
         if len(candidates) == 1:
             mnemonic = incomplete_phrase + " " + candidates[0]
             print("✅ Única palabra encontrada. Continuando...\n")
@@ -857,15 +879,13 @@ def resolve_input(args, interactive=False):
             print("1. Prueba cada palabra en tu wallet para encontrar la correcta")
             print("2. Ingresa el número de la palabra correcta (1 al {max_idx})".format(max_idx=len(candidates)))
             print("3. O ingresa 'q' para cancelar\n")
-            
+
             while True:
                 try:
                     user_input = input("Selecciona una palabra [1-{max_idx}]: ".format(max_idx=len(candidates))).strip()
-                    
                     if user_input.lower() == 'q':
                         print("\n❌ Operación cancelada por el usuario.")
                         sys.exit(0)
-                    
                     try:
                         selection = int(user_input)
                         if 1 <= selection <= len(candidates):
@@ -878,18 +898,33 @@ def resolve_input(args, interactive=False):
                             print(f"❌ Número inválido. Ingresa un número entre 1 y {len(candidates)}.")
                     except ValueError:
                         print("❌ Entrada inválida. Ingresa un número o 'q' para cancelar.")
-                
                 except EOFError:
                     print("\n⚠️  Modo no interactivo detectado. Usando la primera palabra.")
                     print("⚠️  DEBES verificar manualmente cuál es la palabra correcta.\n")
                     mnemonic = incomplete_phrase + " " + candidates[0]
                     break
-        
+
         recovered = mnemonic_to_entropy(mnemonic)
         return recovered["entropy"], mnemonic, recovered, "mnemonic_incomplete"
 
     entropy = generate_entropy(args.words)
     mnemonic = entropy_to_mnemonic(entropy)
+
+    # Reintentar si salen palabras repetidas en la generación
+    max_attempts = 1000
+    if len(set(mnemonic.split())) != len(mnemonic.split()):
+        mnemo = Mnemonic("english")
+        for attempt in range(max_attempts):
+            entropy = generate_entropy(args.words)
+            mnemonic = entropy_to_mnemonic(entropy)
+            if len(set(mnemonic.split())) == len(mnemonic.split()):
+                if attempt > 0:
+                    print(f"✅ Mnemonic sin repeticiones generada en {attempt + 1} intento(s)")
+                break
+        else:
+            print(f"⚠️  ADVERTENCIA: No se pudo generar mnemonic sin repeticiones en {max_attempts} intentos.")
+            print("   Usando la última generación (puede tener repeticiones).")
+
     recovered = {
         "entropy": entropy,
         "entropy_bin": bytes_to_binary(entropy),
@@ -902,10 +937,10 @@ def resolve_input(args, interactive=False):
 def build_context(args, interactive=False):
     entropy, mnemonic, recovered, input_mode = resolve_input(args, interactive)
     seed = mnemonic_seed(mnemonic, args.passphrase)
-    
+
     bip32_master, bip32_chain_code = bip32_master_key(seed)
     bip32_root_key = bip32_master + bip32_chain_code
-    
+
     network = select_network(args.network)
 
     derivations = {
@@ -935,6 +970,9 @@ def build_context(args, interactive=False):
         "gap_limit": GAP_LIMIT,
     }
 
+    seguridad = analizar_seguridad_mnemonic(mnemonic)
+    context["seguridad_mnemonic"] = seguridad
+
     if args.audit_passphrase:
         context["passphrase_audit"] = audit_passphrase(args.passphrase)
 
@@ -944,7 +982,7 @@ def build_context(args, interactive=False):
 def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False):
     if show_all:
         hide_sensitive = False
-    
+
     lines = [
         "\nOffline BIP39 Bitcoin Wallet Report",
         "PROGRAMA SOLO CON FINES EDUCATIVOS Y DE PRUEBA",
@@ -953,7 +991,7 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
         f"Input mode      : {data['input_mode']}",
         f"Network         : {data['network']}",
     ]
-    
+
     if not hide_sensitive or not terminal_mode:
         lines.extend([
             f"Entropy bits    : {data['entropy_bits']}",
@@ -969,6 +1007,26 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
             "Entropy hex     : [OCULTO - ver archivo desencriptado]",
             "Checksum BIP39  : [OCULTO - ver archivo desencriptado]",
             "Checksum valid  : [OCULTO - ver archivo desencriptado]",
+        ])
+
+    if "seguridad_mnemonic" in data:
+        seg = data["seguridad_mnemonic"]
+        lines.extend([
+            "----------------------------------------",
+            "ANÁLISIS DE SEGURIDAD MNEMONIC",
+            "----------------------------------------",
+            f"Score             : {seg['score']}/100",
+            f"Clasificación     : {seg['clasificacion']}",
+            f"Palabras únicas   : {seg['palabras_unicas']}/{seg['palabras']}",
+            f"Ratio unicidad    : {seg['ratio_unicidad']}",
+            f"Entropía Shannon : {seg['entropia_shannon']}",
+            f"Ratio entropía    : {seg['ratio_entropia']}",
+            f"Secuencias        : {seg['secuencias_detectadas']}",
+            f"Palabras repetidas  : {seg['palabras_repetidas_total']} ({seg['palabras_con_repetidos']} palabras con repeticiones)",
+            f"Porcentaje repet. : {seg['porcentaje_repeticion']}",
+            f"Alerta manipulación: {seg['alerta_manipulacion']}",
+            f"  → {seg['mensaje_manipulacion']}",
+            f"Recomendación     : {seg['recomendacion']}",
         ])
 
     if "passphrase_audit" in data:
@@ -995,18 +1053,18 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
         "Mnemonic",
         "----------------------------------------",
     ])
-    
+
     if not hide_sensitive or not terminal_mode:
         lines.append(data["mnemonic"])
     else:
         word_count = len(data["mnemonic"].split())
         lines.append(f"[{word_count} palabras - OCULTO - ver archivo desencriptado]")
-    
+
     lines.extend([
         f"\nMnemonic valid   : {data['mnemonic_valid']}",
         f"Passphrase used  : {data['passphrase_used']}",
     ])
-    
+
     if not hide_sensitive or not terminal_mode:
         lines.extend([
             f"BIP39 seed hex   : {data['bip39_seed_hex']}",
@@ -1017,14 +1075,17 @@ def format_report(data, terminal_mode=True, hide_sensitive=True, show_all=False)
             "BIP39 seed hex   : [OCULTO - ver archivo desencriptado]",
             "BIP32 root key   : [OCULTO - ver archivo desencriptado]",
         ])
-    
+
     lines.append("----------------------------------------")
 
     gap = data.get("gap_limit", GAP_LIMIT)
 
     for name, item in data["derivations"].items():
+        address_type = item.get("address_type", "")
+        display_name = f"[{name}] ({address_type})" if address_type else f"[{name}]"
+        
         lines.extend([
-            f"[{name}]",
+            display_name,
             f"Path template    : {item['path_template']}",
             f"GAP limit       : {gap}",
         ])
@@ -1095,7 +1156,6 @@ def load_vectors(vectors_path):
 
 def run_bip39_test_vectors(vectors_path):
     vectors = load_vectors(vectors_path)
-    
     if isinstance(vectors, dict):
         if "english" in vectors:
             vectors = vectors["english"]
@@ -1105,40 +1165,32 @@ def run_bip39_test_vectors(vectors_path):
                 vectors = vectors[first_key]
             else:
                 raise ValueError("El archivo vectors.json no tiene el formato esperado.")
-    
+
     for i, vector in enumerate(vectors, start=1):
         if isinstance(vector, list) and len(vector) == 3:
             entropy_hex, expected_mnemonic, expected_seed = vector
             entropy = bytes.fromhex(entropy_hex)
-            
             mnemonic = entropy_to_mnemonic(entropy)
             if mnemonic != expected_mnemonic:
                 raise AssertionError(f"Vector {i}: mnemonic no coincide.")
-
             seed = mnemonic_seed(mnemonic, "TREZOR").hex()
             if seed != expected_seed:
                 raise AssertionError(f"Vector {i}: seed no coincide.")
-
             roundtrip = mnemonic_to_entropy(mnemonic)
             if roundtrip["entropy"].hex() != entropy_hex:
                 raise AssertionError(f"Vector {i}: entropía no coincide en round-trip.")
-        
         elif isinstance(vector, list) and len(vector) == 4:
             entropy_hex, expected_mnemonic, expected_seed, _ = vector
             entropy = bytes.fromhex(entropy_hex)
-            
             mnemonic = entropy_to_mnemonic(entropy)
             if mnemonic != expected_mnemonic:
                 raise AssertionError(f"Vector {i}: mnemonic no coincide.")
-
             seed = mnemonic_seed(mnemonic, "TREZOR").hex()
             if seed != expected_seed:
                 raise AssertionError(f"Vector {i}: seed no coincide.")
-
             roundtrip = mnemonic_to_entropy(mnemonic)
             if roundtrip["entropy"].hex() != entropy_hex:
                 raise AssertionError(f"Vector {i}: entropía no coincide en round-trip.")
-        
         else:
             raise ValueError(f"Vector {i}: formato no soportado.")
 
@@ -1180,9 +1232,6 @@ def main():
         print("    El script NO puede continuar sin encriptación.\n")
         sys.exit(1)
 
-    # ========================================================================
-    # NUEVO: Verificación contra BIP39 oficial embebida (offline)
-    # ========================================================================
     print("\n" + "="*60)
     print("VERIFICACIÓN DE INTEGRIDAD BIP39")
     print("="*60)
@@ -1198,14 +1247,14 @@ def main():
     if not args.show_all:
         print("   - Los datos sensibles se ocultarán en pantalla")
     print("   - Debes recordar esta contraseña para abrir el archivo\n")
-    
+
     encrypt_password = get_secure_input("Contraseña para encriptar: ")
     confirm_password = get_secure_input("Confirmar contraseña: ")
-    
+
     if encrypt_password != confirm_password:
         print("\n❌ Las contraseñas no coinciden. Saliendo.")
         sys.exit(1)
-    
+
     if len(encrypt_password) < 8:
         print("\n⚠️  ADVERTENCIA: La contraseña es muy corta (< 8 caracteres).")
         print("    Se recomienda usar una contraseña más larga y segura.")
@@ -1228,7 +1277,7 @@ def main():
     attempt_clear_history()
 
     final_path = export_wallet(data, args.output, args.format, password=encrypt_password)
-    
+
     print()
     print(f"✅ Archivo encriptado guardado: {final_path}")
     print("   ⚠️  Recuerda la contraseña para desencriptar.")
