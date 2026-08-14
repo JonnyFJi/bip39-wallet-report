@@ -44,31 +44,19 @@ python3 wallet_bip39_off_line.py -i
 1. **Pide contraseña para encriptar** (oculta, sin eco)
 2. **Muestra menú de tipo de entrada:**
 Selecciona el tipo de entrada:
-Generar nueva mnemonic aleatoria
-
-Ingresar entropía hexadecimal
-
-Ingresar entropía binaria
-
-Ingresar mnemonic existente
-
-Calcular última palabra (11 o 23 palabras)
-
-text
+- Generar nueva mnemonic aleatoria
+- Ingresar entropía hexadecimal
+- Ingresar entropía binaria
+- Ingresar mnemonic existente
+- Calcular última palabra (11 o 23 palabras)
 3. **Si seleccionas [1], pregunta longitud:**
 Selecciona la longitud de la mnemonic:
-12 palabras (128 bits - estándar, recomendado)
-
-24 palabras (256 bits - máxima seguridad)
-
-text
+- 12 palabras (128 bits - estándar, recomendado)
+- 24 palabras (256 bits - máxima seguridad)
 4. **Pregunta red Bitcoin:**
 Selecciona la red Bitcoin:
-Mainnet (Bitcoin principal - default)
-
-Testnet (Bitcoin de pruebas)
-
-text
+- Mainnet (Bitcoin principal - default)
+- Testnet (Bitcoin de pruebas)
 5. **Pide passphrase** (opcional, oculta)
 6. **Genera wallet** con análisis de seguridad automático
 7. **Muestra reporte** en terminal (datos sensibles ocultos)
